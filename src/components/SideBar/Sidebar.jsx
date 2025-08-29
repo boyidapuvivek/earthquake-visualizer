@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { X } from "lucide-react"
 import SidebarHeader from "../SideBar/SidebarHeader"
-import SearchSection from "../SideBar/SettingsSection"
+import SearchSection from "../SideBar/SearchSection"
 import IntensityFilters from "../SideBar/IntensityFilters"
 import StatsSection from "../SideBar/StatsSection"
 import SettingsSection from "../SideBar/SettingsSection"
