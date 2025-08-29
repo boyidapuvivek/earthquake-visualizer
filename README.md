@@ -1,4 +1,4 @@
-# 🌍 Seismic Monitor
+# 🌍 Earthquake Visualizer
 
 A **real-time earthquake monitoring web application** built with **React + Vite + Leaflet** that visualizes global seismic events on an interactive map.  
 It supports **heatmap, clustering, and standard views** with advanced filters and a responsive sidebar.
