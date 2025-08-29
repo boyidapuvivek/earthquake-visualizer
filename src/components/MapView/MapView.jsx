@@ -79,45 +79,15 @@ export default function MapView({ earthquakes, filters, mapRef, viewMode }) {
         )}
       </MapContainer>
 
-      {/* Floating Map Controls */}
-      <div
-        className={`absolute top-6 right-6 z-20 transition-all duration-300 ${
-          showControls ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
-        }`}>
-        <div className='bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-2'>
-          {/* Map Style Dropdown */}
-          <div className='relative'>
-            {/* Toggle Button */}
-            <button
-              onClick={() => setStyleMenuOpen(!styleMenuOpen)}
-              className='flex items-center px-2 py-2 rounded-lg text-white text-sm font-medium'>
-              <Map className='w-4 h-4 text-slate-400 hover:text-blue-800' />
-            </button>
-
-            {/* Dropdown */}
-            {styleMenuOpen && (
-              <div className='absolute right-0 mt-2 w-40 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-50'>
-                {Object.entries(mapStyles).map(([style]) => (
-                  <button
-                    key={style}
-                    onClick={() => handleStyleChange(style)}
-                    className={`w-full px-4 py-2 text-sm flex items-center justify-between transition ${
-                      mapStyle === style
-                        ? "bg-blue-50 text-blue-600 font-semibold"
-                        : "text-slate-700 hover:bg-slate-100"
-                    }`}>
-                    {style.charAt(0).toUpperCase() + style.slice(1)}
-                    {mapStyle === style && <Check className='w-4 h-4' />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Zoom & Reset */}
-      <MapControls mapRef={mapRef} />
+      {/* Zoom & Reset Controls with Map Style Button */}
+      <MapControls
+        mapRef={mapRef}
+        mapStyle={mapStyle}
+        mapStyles={mapStyles}
+        styleMenuOpen={styleMenuOpen}
+        setStyleMenuOpen={setStyleMenuOpen}
+        handleStyleChange={handleStyleChange}
+      />
     </div>
   )
 }
