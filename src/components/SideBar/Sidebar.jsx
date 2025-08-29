@@ -1,0 +1,57 @@
+import { useState } from "react"
+import SidebarHeader from "./SideBarHeader"
+import SearchSection from "./SearchSection"
+import IntensityFilters from "./IntensityFilters"
+import StatsSection from "./StatsSection"
+import SettingsSection from "./SettingsSection"
+
+export default function Sidebar({
+  filters,
+  setFilters,
+  mapRef,
+  earthquakes,
+  viewMode,
+  setViewMode,
+  loading,
+}) {
+  const [activeTab, setActiveTab] = useState("filters")
+
+  return (
+    <aside
+      className='w-96 bg-gradient-to-br from-white/90 via-slate-50/90 to-blue-50/90 
+                     backdrop-blur-xl shadow-2xl h-screen flex flex-col border-r border-white/50 relative overflow-hidden'>
+      {/* Background decoration */}
+      <div className='absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-200/30 to-indigo-200/30 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2'></div>
+      <div className='absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-200/30 to-blue-200/30 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2'></div>
+
+      {/* Header */}
+      <SidebarHeader
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+
+      {/* Body */}
+      <div className='flex-1 overflow-y-auto relative z-10'>
+        {activeTab === "filters" && (
+          <>
+            <SearchSection mapRef={mapRef} />
+            <IntensityFilters
+              filters={filters}
+              setFilters={setFilters}
+              earthquakes={earthquakes}
+            />
+          </>
+        )}
+
+        {activeTab === "stats" && <StatsSection earthquakes={earthquakes} />}
+
+        {activeTab === "settings" && (
+          <SettingsSection
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+          />
+        )}
+      </div>
+    </aside>
+  )
+}

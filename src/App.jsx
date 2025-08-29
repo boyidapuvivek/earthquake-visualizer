@@ -1,7 +1,7 @@
 import { useRef, useState } from "react"
 import useEarthquakeData from "./hooks/useEarthquakeData"
-import MapView from "./components/MapView"
-import Sidebar from "./components/SideBar"
+import MapView from "./components/MapView/MapView"
+import Sidebar from "./components/SideBar/Sidebar"
 
 export default function App() {
   const { earthquakes, loading } = useEarthquakeData()
