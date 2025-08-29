@@ -1,6 +1,12 @@
 import { Marker, Popup, Circle } from "react-leaflet"
 import L from "leaflet"
 import { formatDate } from "../utils/formatData"
+import {
+  MapPin, // for location
+  Clock, // for time
+  Calendar, // for full date
+  ExternalLink, // for USGS details
+} from "lucide-react"
 
 const getMarkerIcon = (magnitude, clustered = false) => {
   const getSize = (mag) => {
@@ -129,16 +135,13 @@ export default function EarthquakeMarker({ earthquake, clustered = false }) {
   const [lng, lat, depth] = earthquake.geometry.coordinates
   const intensityInfo = getIntensityInfo(mag)
 
-  const formatDepth = (depth) => {
-    if (depth === null || depth === undefined) return "Unknown"
-    return `${Math.abs(depth).toFixed(1)} km`
-  }
+  const formatDepth = (depth) =>
+    depth == null ? "Unknown" : `${Math.abs(depth).toFixed(1)} km`
 
   const getTimeAgo = (timestamp) => {
     const now = new Date()
     const eventTime = new Date(timestamp)
     const diffInMinutes = Math.floor((now - eventTime) / (1000 * 60))
-
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`
     return `${Math.floor(diffInMinutes / 1440)}d ago`
@@ -150,7 +153,7 @@ export default function EarthquakeMarker({ earthquake, clustered = false }) {
       {mag >= 5 && (
         <Circle
           center={[lat, lng]}
-          radius={mag * 50000} // Radius based on magnitude
+          radius={mag * 50000}
           pathOptions={{
             fillColor: mag >= 6 ? "#ef4444" : mag >= 5 ? "#f97316" : "#10b981",
             fillOpacity: 0.1,
@@ -170,7 +173,7 @@ export default function EarthquakeMarker({ earthquake, clustered = false }) {
           closeButton={true}
           autoPan={true}>
           <div className='bg-white rounded-2xl shadow-2xl border-0 overflow-hidden min-w-80'>
-            {/* Header with gradient */}
+            {/* Header */}
             <div
               className={`${intensityInfo.bgColor} border-2 p-4 relative overflow-hidden`}>
               <div className='absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/20 to-transparent rounded-full -translate-y-16 translate-x-16'></div>
@@ -222,24 +225,7 @@ export default function EarthquakeMarker({ earthquake, clustered = false }) {
               <div className='space-y-2'>
                 <div className='flex items-start gap-3'>
                   <div className='w-5 h-5 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5'>
-                    <svg
-                      className='w-3 h-3 text-slate-600'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'>
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'
-                      />
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M15 11a3 3 0 11-6 0 3 3 0 016 0z'
-                      />
-                    </svg>
+                    <MapPin className='w-3 h-3 text-slate-600' />
                   </div>
                   <div className='flex-1'>
                     <p className='text-slate-800 font-semibold text-sm leading-relaxed'>
@@ -275,18 +261,7 @@ export default function EarthquakeMarker({ earthquake, clustered = false }) {
               {/* Full timestamp */}
               <div className='bg-slate-50 rounded-xl p-3 border border-slate-100'>
                 <div className='flex items-center gap-2 mb-1'>
-                  <svg
-                    className='w-3 h-3 text-slate-500'
-                    fill='none'
-                    stroke='currentColor'
-                    viewBox='0 0 24 24'>
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                    />
-                  </svg>
+                  <Clock className='w-3 h-3 text-slate-500' />
                   <span className='text-slate-500 text-xs font-medium uppercase tracking-wide'>
                     Full Date
                   </span>
@@ -306,18 +281,7 @@ export default function EarthquakeMarker({ earthquake, clustered = false }) {
                            bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl 
                            hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 
                            shadow-lg hover:shadow-xl hover:scale-105 text-sm'>
-                  <svg
-                    className='w-4 h-4'
-                    fill='none'
-                    stroke='currentColor'
-                    viewBox='0 0 24 24'>
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14'
-                    />
-                  </svg>
+                  <ExternalLink className='w-4 h-4' />
                   View USGS Details
                 </a>
               )}

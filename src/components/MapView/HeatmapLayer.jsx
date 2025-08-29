@@ -11,7 +11,7 @@ export default function HeatmapLayer({ earthquakes }) {
     const heatData = earthquakes.map((eq) => [
       eq.geometry.coordinates[1], // lat
       eq.geometry.coordinates[0], // lng
-      eq.properties.mag / 10, // intensity weight
+      eq.properties.mag + 5, // intensity weight
     ])
 
     const heat = window.L.heatLayer(heatData, {

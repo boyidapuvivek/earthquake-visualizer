@@ -19,7 +19,7 @@ export default function SidebarHeader({ activeTab, setActiveTab }) {
       </div>
 
       {/* Tabs */}
-      <div className='flex gap-2 bg-gray-200 p-1.5 rounded-xl'>
+      <div className='flex bg-gray-200 p-1.5 rounded-xl justify-between'>
         <TabButton
           id='filters'
           label='Filters'

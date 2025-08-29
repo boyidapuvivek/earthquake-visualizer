@@ -6,7 +6,7 @@ import HeatmapLayer from "./HeatmapLayer"
 import MapControls from "./MapControls"
 
 export default function MapView({ earthquakes, filters, mapRef, viewMode }) {
-  const [mapStyle, setMapStyle] = useState("satellite")
+  const [mapStyle, setMapStyle] = useState("terrain")
   const [showControls, setShowControls] = useState(true)
 
   const filterByIntensity = (eq) => {
@@ -20,6 +20,10 @@ export default function MapView({ earthquakes, filters, mapRef, viewMode }) {
   const filteredEarthquakes = earthquakes.filter(filterByIntensity)
 
   const mapStyles = {
+    terrain: {
+      url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+      attribution: "&copy; OpenStreetMap, SRTM | © OpenTopoMap",
+    },
     satellite: {
       url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       attribution: "Tiles &copy; Esri",
@@ -31,10 +35,6 @@ export default function MapView({ earthquakes, filters, mapRef, viewMode }) {
     light: {
       url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
       attribution: "&copy; OpenStreetMap, &copy; CARTO",
-    },
-    terrain: {
-      url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-      attribution: "&copy; OpenStreetMap, SRTM | © OpenTopoMap",
     },
   }
 
