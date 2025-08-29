@@ -1,14 +1,21 @@
 import { Marker, Popup, Circle } from "react-leaflet"
 import L from "leaflet"
+import { useMap } from "react-leaflet"
 import { formatDate } from "../utils/formatData"
 import {
   MapPin, // for location
   Clock, // for time
   Calendar, // for full date
   ExternalLink, // for USGS details
+  Mountain, // for depth
+  Zap, // for intensity
 } from "lucide-react"
 
-const getMarkerIcon = (magnitude, clustered = false) => {
+const getMarkerIcon = (
+  magnitude,
+  clustered = false,
+  popupDirection = "top"
+) => {
   const getSize = (mag) => {
     if (mag >= 6) return clustered ? 48 : 40
     if (mag >= 5) return clustered ? 40 : 32
@@ -52,6 +59,17 @@ const getMarkerIcon = (magnitude, clustered = false) => {
   const colors = getColor(magnitude)
   const pulseSize = size + 8
 
+  // Adjust popup anchor based on desired direction
+  const getPopupAnchor = () => {
+    switch (popupDirection) {
+      case "bottom":
+        return [0, size / 2 + 10] // Show popup below marker
+      case "top":
+      default:
+        return [0, -size / 2] // Show popup above marker (default)
+    }
+  }
+
   return L.divIcon({
     className: "custom-earthquake-marker",
     html: `
@@ -89,7 +107,7 @@ const getMarkerIcon = (magnitude, clustered = false) => {
     `,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
-    popupAnchor: [0, -size / 2],
+    popupAnchor: getPopupAnchor(),
   })
 }
 
@@ -97,36 +115,36 @@ const getIntensityInfo = (magnitude) => {
   if (magnitude >= 6)
     return {
       level: "Major",
-      description: "Significant damage possible",
+      description: "Significant damage",
       color: "text-red-600",
-      bgColor: "bg-red-50 border-red-200",
+      bgColor: "bg-red-600",
     }
   if (magnitude >= 5)
     return {
       level: "Moderate",
-      description: "Noticeable shaking, minor damage",
+      description: "Minor damage",
       color: "text-red-500",
-      bgColor: "bg-red-50 border-red-200",
+      bgColor: "bg-red-500",
     }
   if (magnitude >= 4)
     return {
       level: "Light",
-      description: "Often felt, rarely causes damage",
+      description: "Rarely damages",
       color: "text-orange-500",
-      bgColor: "bg-orange-50 border-orange-200",
+      bgColor: "bg-orange-500",
     }
   if (magnitude >= 3)
     return {
       level: "Minor",
-      description: "Weak shaking, felt by few people",
+      description: "Weak shaking",
       color: "text-orange-400",
-      bgColor: "bg-orange-50 border-orange-200",
+      bgColor: "bg-orange-400",
     }
   return {
     level: "Micro",
-    description: "Generally not felt",
+    description: "Not felt",
     color: "text-emerald-500",
-    bgColor: "bg-emerald-50 border-emerald-200",
+    bgColor: "bg-emerald-500",
   }
 }
 
@@ -134,6 +152,7 @@ export default function EarthquakeMarker({ earthquake, clustered = false }) {
   const { mag, place, time, url, title } = earthquake.properties
   const [lng, lat, depth] = earthquake.geometry.coordinates
   const intensityInfo = getIntensityInfo(mag)
+  const map = useMap()
 
   const formatDepth = (depth) =>
     depth == null ? "Unknown" : `${Math.abs(depth).toFixed(1)} km`
@@ -146,6 +165,30 @@ export default function EarthquakeMarker({ earthquake, clustered = false }) {
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`
     return `${Math.floor(diffInMinutes / 1440)}d ago`
   }
+
+  const formatLocationShort = (location) => {
+    if (!location) return "Unknown location"
+    // Trim long location names and keep essential info
+    return location.length > 35 ? location.substring(0, 32) + "..." : location
+  }
+
+  // Determine popup direction based on marker position on screen
+  const getPopupDirection = () => {
+    if (!map) return "top"
+
+    const bounds = map.getBounds()
+    const center = map.getCenter()
+
+    // If marker is in the top third of visible area, show popup below
+    if (lat > center.lat + (bounds.getNorth() - center.lat) * 0.3) {
+      return "bottom"
+    }
+
+    // Default: show popup above
+    return "top"
+  }
+
+  const popupDirection = getPopupDirection()
 
   return (
     <>
@@ -166,123 +209,90 @@ export default function EarthquakeMarker({ earthquake, clustered = false }) {
 
       <Marker
         position={[lat, lng]}
-        icon={getMarkerIcon(mag, clustered)}>
+        icon={getMarkerIcon(mag, clustered, popupDirection)}>
         <Popup
           className='custom-earthquake-popup'
-          maxWidth={350}
+          maxWidth={240}
           closeButton={true}
-          autoPan={true}>
-          <div className='bg-white rounded-2xl shadow-2xl border-0 overflow-hidden min-w-80'>
-            {/* Header */}
-            <div
-              className={`${intensityInfo.bgColor} border-2 p-4 relative overflow-hidden`}>
-              <div className='absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/20 to-transparent rounded-full -translate-y-16 translate-x-16'></div>
-              <div className='relative z-10'>
-                <div className='flex items-center justify-between mb-3'>
-                  <div className='flex items-center gap-3'>
-                    <div
-                      className={`w-4 h-4 rounded-full ${
-                        mag >= 6
-                          ? "bg-red-600"
-                          : mag >= 5
-                          ? "bg-red-500"
-                          : mag >= 4
-                          ? "bg-orange-500"
-                          : mag >= 3
-                          ? "bg-orange-400"
-                          : "bg-emerald-400"
-                      } shadow-lg animate-pulse`}></div>
-                    <div>
-                      <span
-                        className={`text-2xl font-bold ${intensityInfo.color}`}>
-                        M {mag.toFixed(1)}
-                      </span>
-                      <div
-                        className={`text-sm font-semibold ${intensityInfo.color} opacity-80`}>
-                        {intensityInfo.level}
-                      </div>
-                    </div>
-                  </div>
-                  <div className='text-right'>
-                    <div className='text-xs text-slate-600 font-medium'>
-                      {getTimeAgo(time)}
-                    </div>
-                    <div className='text-xs text-slate-500'>
-                      {formatDate(time).split(",")[0]}
+          autoPan={true}
+          keepInView={true}
+          autoPanPadding={[20, 20]}
+          offset={[0, 0]}>
+          <div className='bg-white rounded-lg shadow-lg border-0 overflow-hidden z-1000'>
+            {/* Compact Header */}
+            <div className={`${intensityInfo.bgColor} text-white p-2`}>
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center gap-2'>
+                  <Zap className='w-4 h-4' />
+                  <div>
+                    <span className='text-lg font-bold'>
+                      M {mag.toFixed(1)}
+                    </span>
+                    <div className='text-xs opacity-90'>
+                      {intensityInfo.level}
                     </div>
                   </div>
                 </div>
-                <p
-                  className={`text-sm ${intensityInfo.color} opacity-80 font-medium`}>
-                  {intensityInfo.description}
-                </p>
+                <div className='text-right text-xs'>
+                  <div className='font-medium'>{getTimeAgo(time)}</div>
+                  <div className='opacity-80'>
+                    {formatDate(time).split(",")[0]}
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Main content */}
-            <div className='p-4 space-y-4'>
-              {/* Location */}
-              <div className='space-y-2'>
-                <div className='flex items-start gap-3'>
-                  <div className='w-5 h-5 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5'>
-                    <MapPin className='w-3 h-3 text-slate-600' />
+            {/* Compact Content */}
+            <div className='p-2 space-y-2'>
+              {/* Location - icon + text */}
+              <div className='flex items-start gap-2'>
+                <MapPin className='w-3 h-3 text-slate-500 mt-0.5 flex-shrink-0' />
+                <div className='text-xs'>
+                  <div className='font-medium text-slate-800 leading-tight'>
+                    {formatLocationShort(place || title)}
                   </div>
-                  <div className='flex-1'>
-                    <p className='text-slate-800 font-semibold text-sm leading-relaxed'>
-                      {place || title || "Location not specified"}
-                    </p>
-                    <p className='text-slate-500 text-xs'>
-                      {lat.toFixed(4)}°, {lng.toFixed(4)}°
-                    </p>
+                  <div className='text-slate-500'>
+                    {lat.toFixed(2)}°, {lng.toFixed(2)}°
                   </div>
                 </div>
               </div>
 
-              {/* Details grid */}
-              <div className='grid grid-cols-2 gap-3'>
-                <div className='bg-slate-50 rounded-xl p-3 text-center border border-slate-100'>
-                  <div className='text-slate-500 text-xs font-medium uppercase tracking-wide mb-1'>
-                    Depth
-                  </div>
-                  <div className='text-slate-800 font-bold text-sm'>
-                    {formatDepth(depth)}
-                  </div>
+              {/* Quick stats - horizontal layout */}
+              <div className='flex gap-3 text-xs'>
+                <div className='flex items-center gap-1'>
+                  <Mountain className='w-3 h-3 text-slate-500' />
+                  <span className='text-slate-600'>{formatDepth(depth)}</span>
                 </div>
-                <div className='bg-slate-50 rounded-xl p-3 text-center border border-slate-100'>
-                  <div className='text-slate-500 text-xs font-medium uppercase tracking-wide mb-1'>
-                    Time
-                  </div>
-                  <div className='text-slate-800 font-bold text-sm'>
-                    {formatDate(time).split(",")[1]}
-                  </div>
-                </div>
-              </div>
-
-              {/* Full timestamp */}
-              <div className='bg-slate-50 rounded-xl p-3 border border-slate-100'>
-                <div className='flex items-center gap-2 mb-1'>
+                <div className='flex items-center gap-1'>
                   <Clock className='w-3 h-3 text-slate-500' />
-                  <span className='text-slate-500 text-xs font-medium uppercase tracking-wide'>
+                  <span className='text-slate-600'>
+                    {formatDate(time).split(",")[1]}
+                  </span>
+                </div>
+              </div>
+
+              {/* Compact timestamp */}
+              <div className='bg-slate-50 rounded p-2'>
+                <div className='flex items-center gap-1 mb-1'>
+                  <Calendar className='w-3 h-3 text-slate-500' />
+                  <span className='text-xs text-slate-500 font-medium'>
                     Full Date
                   </span>
                 </div>
-                <p className='text-slate-700 text-sm font-medium'>
-                  {formatDate(time)}
-                </p>
+                <div className='text-xs text-slate-700'>{formatDate(time)}</div>
               </div>
 
-              {/* Action button */}
+              {/* Compact action button */}
               {url && (
                 <a
                   href={url}
                   target='_blank'
                   rel='noreferrer'
-                  className='w-full inline-flex items-center justify-center gap-3 px-4 py-3 
-                           bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl 
-                           hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 
-                           shadow-lg hover:shadow-xl hover:scale-105 text-sm'>
-                  <ExternalLink className='w-4 h-4' />
-                  View USGS Details
+                  className='w-full flex items-center justify-center gap-2 px-3 py-2 
+                           bg-blue-600 rounded 
+                           hover:bg-blue-700 transition-colors text-xs'>
+                  <ExternalLink className='w-3 h-3 text-white' />
+                  <text className='text-white font-medium '>USGS Details</text>
                 </a>
               )}
             </div>

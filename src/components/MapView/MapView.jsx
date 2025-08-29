@@ -1,13 +1,13 @@
 import { MapContainer, TileLayer } from "react-leaflet"
 import { useState } from "react"
-import EarthquakeLayer from "./EarthquakeLayer"
-import ClusterLayer from "./ClusterLayer"
-import HeatmapLayer from "./HeatmapLayer"
-import MapControls from "./MapControls"
+import EarthquakeLayer from "../MapView/EarthquakeLayer"
+import ClusterLayer from "../MapView/ClusterLayer"
+import HeatmapLayer from "../MapView/HeatmapLayer"
+import MapControls from "../MapView/MapControls"
 import { Layers, Check, Map } from "lucide-react" // using icons
 
 export default function MapView({ earthquakes, filters, mapRef, viewMode }) {
-  const [mapStyle, setMapStyle] = useState("terrain")
+  const [mapStyle, setMapStyle] = useState("satellite")
   const [showControls, setShowControls] = useState(true)
   const [styleMenuOpen, setStyleMenuOpen] = useState(false)
 
@@ -22,13 +22,13 @@ export default function MapView({ earthquakes, filters, mapRef, viewMode }) {
   const filteredEarthquakes = earthquakes.filter(filterByIntensity)
 
   const mapStyles = {
-    terrain: {
-      url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-      attribution: "&copy; OpenStreetMap, SRTM | © OpenTopoMap",
-    },
     satellite: {
       url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       attribution: "Tiles &copy; Esri",
+    },
+    terrain: {
+      url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+      attribution: "&copy; OpenStreetMap, SRTM | © OpenTopoMap",
     },
     dark: {
       url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
@@ -59,8 +59,7 @@ export default function MapView({ earthquakes, filters, mapRef, viewMode }) {
         ]}
         ref={mapRef}
         maxBoundsViscosity={1.0}
-        zoomControl={false}
-        attributionControl={false}>
+        zoomControl={false}>
         <TileLayer
           url={mapStyles[mapStyle].url}
           attribution={mapStyles[mapStyle].attribution}

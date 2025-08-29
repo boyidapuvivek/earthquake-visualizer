@@ -1,10 +1,10 @@
 import { useState } from "react"
 import { X } from "lucide-react"
-import SidebarHeader from "./SideBarHeader"
-import SearchSection from "./SearchSection"
-import IntensityFilters from "./IntensityFilters"
-import StatsSection from "./StatsSection"
-import SettingsSection from "./SettingsSection"
+import SidebarHeader from "../SideBar/SidebarHeader"
+import SearchSection from "../SideBar/SettingsSection"
+import IntensityFilters from "../SideBar/IntensityFilters"
+import StatsSection from "../SideBar/StatsSection"
+import SettingsSection from "../SideBar/SettingsSection"
 
 export default function Sidebar({
   filters,
